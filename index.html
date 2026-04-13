@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Locație activă</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 40px; background: #f0f4ff; }
+    .status { font-size: 18px; margin-top: 20px; }
+    .dot { display: inline-block; width: 12px; height: 12px; background: #22c55e;
+           border-radius: 50%; margin-right: 8px; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  </style>
+</head>
+<body>
+  <h2>📍 Locație activă</h2>
+  <div class="status">
+    <span class="dot"></span>
+    <span id="msg">Se inițializează...</span>
+  </div>
+  <p id="coords" style="color:#888; font-size:14px;"></p>
+
+  <script>
+    // !! Schimbă asta cu numărul copilului !!
+    const CHILD_PHONE = "+40712345678";
+    const SERVER = "https://diagnosis-daylight-lemon.ngrok-free.dev";
+
+    function sendLocation() {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+
+        fetch(`${SERVER}/location`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ phone: CHILD_PHONE, lat, lng })
+        });
+
+        document.getElementById("msg").textContent = "Locație trimisă ✅";
+        document.getElementById("coords").textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      }, (err) => {
+        document.getElementById("msg").textContent = "❌ Permite accesul la locație!";
+      }, { enableHighAccuracy: true });
+    }
+
+    // Trimite imediat și apoi la fiecare 2 minute
+    sendLocation();
+    setInterval(sendLocation, 2 * 60 * 1000);
+  </script>
+</body>
+</html>
